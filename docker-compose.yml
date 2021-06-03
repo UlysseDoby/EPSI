@@ -17,7 +17,7 @@ services:
       MYSQL_DATABASE : ocsweb
     
   glpi:
-    image: ulysse/glpi
+    image: diouxx/glpi
     container_name : glpi
     hostname: glpi
     ports:
