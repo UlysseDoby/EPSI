@@ -1,10 +1,10 @@
-services:
-  openvpn:
-    image: 'kylemanna/openvpn:2.4'
-    volumes:
-      - "/var/docker/openvpn/data:/var/data_openvpn"
+openvpn:
+    image: "kylemanna/openvpn:2.4"
+    container_name: openvpn
     ports:
-      - "443:1194/udp"
+        - "443:1194/udp"
+    volumes:
+        - "/var/docker/openvpn/data:/var/data_openvpn"
     cap_add:
-      - NET_ADMIN
-    restart: always/
+        - NET_ADMIN
+    restart: always
