@@ -28,9 +28,9 @@ services:
     networks:
             glpi_project:
     links :
-      - mysql
+      - db
     depends_on:
-      - mysql
+      - db
     environment:
       - TIMEZONE=Europe/Brussels
     volumes:
