@@ -34,3 +34,6 @@ services:
     volumes:
       - "/var/www/html/glpi/:/var/www/html/glpi"
     restart: always
+    
+networks:
+  glpi_project:
