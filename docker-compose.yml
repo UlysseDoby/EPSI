@@ -1,52 +1,77 @@
-version: '2.1'
+version: '3'
+
 services:
-
-  glpi:
-    image: turgon37/glpi:nginx-72-latest
-    environment:
-      GLPI_REMOVE_INSTALLER: 'no'
-      GLPI_INSTALL_PLUGINS: "
-        fusioninventory|https://github.com/fusioninventory/fusioninventory-for-glpi/releases/download/glpi9.4%2B2.4/fusioninventory-9.4+2.4.tar.bz2,\
-        dumpentity|https://forge.glpi-project.org/attachments/download/2089/glpi-dumpentity-1.4.0.tar.gz\
-        "
+  ocsapplication:
+    image: ocsinventory/ocsinventory-docker-image:2.6
+    container_name : ocsinventory-server
+    restart: always
     ports:
-      - 127.0.0.1:8008:80
+      - 90:80
+      - 443:443
     volumes:
-      - data-glpi-files:/var/www/files
-      - data-glpi-config:/var/www/config
-    depends_on:
-      mysqldb:
-        condition: service_healthy
-    restart: always
-    networks:
-      glpi-network:
-        aliases:
-          - glpi
-
-  mysqldb:
-    image: mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8
+      - "perlcomdata:/etc/ocsinventory-server"
+      - "extensionsdata:/usr/share/ocsinventory-reports/ocsreports/extensions"
+      - "varlibdata:/var/lib/ocsinventory-reports"
+      - "httpdconfdata:/etc/httpd/conf.d"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - mysql-glpi-db:/var/lib/mysql
-    restart: always
+      OCS_DB_SERVER: mysql
+      OCS_DB_USER: ocsuser
+      OCS_DB_PASS: ocspass
+      OCS_DB_NAME: ocsweb
+    links:
+      - mysql
     networks:
-      glpi-network:
-        aliases:
-          - mysqldb
+            glpi_project:
+    depends_on:
+      - mysql    
 
+  mysql :
+    image : mysql:5.7
+    container_name : mysql
+    hostname: mysql
+    restart: always
+    ports :
+      - 3306:3306
+    volumes :
+      - ./sql/:/docker-entrypoint-initdb.d/
+      - "/var/lib/mysql:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD : rootpass
+      MYSQL_USER : ocsuser
+      MYSQL_PASSWORD : ocspass
+      MYSQL_DATABASE : ocsweb
+    entrypoint:
+      sh -c "
+        echo 'CREATE DATABASE IF NOT EXISTS glpidb; CREATE USER glpi_user@localhost; GRANT ALL PRIVILEGES ON glpidb.* TO glpi_user@% IDENTIFIED BY glpi; FLUSH PRIVILEGES;' > /docker-entrypoint-initdb.d/init.glpidb.sql;
+        /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      "
+#    command: bash -c "mysql -u root -prootpass  mysql < /docker-entrypoint-initdb.d/init.db1.sql"
+    networks:
+            glpi_project:
+  glpi:
+    image: diouxx/glpi
+    container_name : glpi
+    hostname: glpi
+    ports:
+      - "80:80"
+    networks:
+            glpi_project:
+    links :
+      - mysql
+    depends_on:
+      - mysql
+    environment:
+      - TIMEZONE=Europe/Brussels
+    volumes:
+      - "/var/www/html/glpi/:/var/www/html/glpi"
+    restart: always
+ 
 networks:
-  glpi-network:
-    driver: bridge
+  glpi_project:
 
 volumes:
-  data-glpi-files:
-  data-glpi-config:
-  mysql-glpi-db:
+  perlcomdata:
+  extensionsdata:
+  varlibdata:
+  httpdconfdata:
+  sqldata:
