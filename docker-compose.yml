@@ -34,13 +34,3 @@ services:
     volumes:
       - "/var/www/html/glpi/:/var/www/html/glpi"
     restart: always
- 
-networks:
-  glpi_project:
-
-volumes:
-  perlcomdata:
-  extensionsdata:
-  varlibdata:
-  httpdconfdata:
-  sqldata:
