@@ -1,8 +1,9 @@
 version: '3'
 
 services:
-  mysql :
+  db :
     image : mysql:8.0.25
+    command: --default-authentication-plugin=mysql_native_password
     container_name : mysql
     hostname: mysql
     restart: always
@@ -15,6 +16,13 @@ services:
       MYSQL_USER : ocsuser
       MYSQL_PASSWORD : toor
       MYSQL_DATABASE : ocsweb
+    
+    adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+   
     
   glpi:
     image: diouxx/glpi
