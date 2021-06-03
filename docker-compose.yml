@@ -4,7 +4,7 @@ openvpn:
     ports:
         - "443:1194/udp"
     volumes:
-        - "/var/docker/openvpn/data:/var/data_openvpn"
+        - "~/openvpn/data:/etc/openvpn"
     cap_add:
         - NET_ADMIN
     restart: always
